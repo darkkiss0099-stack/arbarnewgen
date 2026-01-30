@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Prompt:wght@200;400&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CSS Reset & Base --- */
         * {
             margin: 0;
             padding: 0;
@@ -19,10 +18,10 @@
             background-color: #000;
             font-family: 'Prompt', sans-serif;
             color: #fff;
-            overflow: hidden; /* ล็อคหน้าจอไม่ให้เลื่อน */
+            overflow: hidden;
         }
 
-        /* --- Background Animation (พื้นหลังขยับได้) --- */
+        /* --- Background & Rain --- */
         .hero-container {
             position: relative;
             height: 100vh;
@@ -40,29 +39,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* ใส่ URL รูปภาพของคุณที่นี่ */
             background-image: url('https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=1974&auto=format&fit=crop'); 
             background-size: cover;
             background-position: center;
-            filter: grayscale(100%) brightness(40%); /* ทำเป็นขาวดำและมืดลง */
-            z-index: -2;
+            filter: grayscale(100%) brightness(30%);
+            z-index: -3;
             animation: moveBackground 20s infinite alternate ease-in-out;
         }
 
-        @keyframes moveBackground {
-            0% { transform: scale(1) translate(0, 0); }
-            100% { transform: scale(1.1) translate(-1%, -2%); }
-        }
-
-        /* เอฟเฟกต์ฝนตกเบาๆ ด้วย Overlay */
-        .overlay-rain {
+        /* Canvas สำหรับฝนตก */
+        #rainCanvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
             z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
         }
 
         /* --- Content Layout --- */
@@ -71,47 +69,60 @@
             z-index: 10;
         }
 
+        .main-logo-container {
+            min-height: 120px; /* กันหน้าจอขยับตอนลบข้อความ */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         .main-logo {
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(40px, 8vw, 90px); /* ย่อขยายตามหน้าจอ */
-            letter-spacing: 20px;
+            font-size: clamp(40px, 8vw, 90px);
+            letter-spacing: 15px;
             font-weight: 700;
-            margin-bottom: 5px;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
+            border-right: 4px solid #fff; /* เส้น Cursor */
+            animation: blink 0.75s step-end infinite;
+            padding-right: 10px;
+        }
+
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: #fff; }
         }
 
         .sub-title {
             font-family: 'Orbitron', sans-serif;
             font-size: clamp(12px, 2vw, 18px);
             letter-spacing: 10px;
-            opacity: 0.7;
+            opacity: 0.6;
             margin-bottom: 60px;
+            margin-top: 10px;
         }
 
         /* --- Glassmorphism Panel --- */
         .glass-panel {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 25px 40px;
             display: flex;
             align-items: center;
             gap: 40px;
-            border-radius: 2px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 4px;
         }
 
-        /* Member Button */
         .member-btn {
-            position: relative;
+            border-left: 3px solid #fff;
             padding: 12px 35px;
             cursor: pointer;
-            border-left: 3px solid #fff;
             transition: 0.4s;
-            overflow: hidden;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
         }
+
+        .member-btn:hover { background: rgba(255,255,255,0.15); }
 
         .member-btn span {
             font-family: 'Orbitron', sans-serif;
@@ -119,23 +130,6 @@
             font-size: 14px;
         }
 
-        .member-btn::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 0;
-            height: 100%;
-            background: rgba(255,255,255,0.1);
-            transition: 0.4s;
-            z-index: -1;
-        }
-
-        .member-btn:hover::before {
-            width: 100%;
-        }
-
-        /* Partner Info */
         .partner-section {
             text-align: left;
             border-left: 1px solid rgba(255,255,255,0.1);
@@ -146,46 +140,25 @@
             font-size: 11px;
             letter-spacing: 4px;
             color: rgba(255,255,255,0.5);
-            margin-bottom: 8px;
-            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 5px;
         }
 
         .partner-names {
             font-size: 15px;
-            font-weight: 400;
             letter-spacing: 1px;
-            margin-bottom: 4px;
         }
 
-        .footer-note {
-            font-size: 10px;
-            color: rgba(255,255,255,0.3);
-        }
-
-        /* --- Footer --- */
         .copyright {
             position: absolute;
             bottom: 30px;
             font-size: 10px;
             letter-spacing: 3px;
             color: rgba(255,255,255,0.2);
-            text-transform: uppercase;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .glass-panel {
-                flex-direction: column;
-                gap: 20px;
-                padding: 20px;
-            }
-            .partner-section {
-                border-left: none;
-                border-top: 1px solid rgba(255,255,255,0.1);
-                padding-left: 0;
-                padding-top: 20px;
-                text-align: center;
-            }
+            .glass-panel { flex-direction: column; gap: 20px; text-align: center; }
+            .partner-section { border: none; padding: 0; }
         }
     </style>
 </head>
@@ -193,10 +166,12 @@
 
     <div class="hero-container">
         <div class="bg-image"></div>
-        <div class="overlay-rain"></div>
+        <canvas id="rainCanvas"></canvas>
 
         <div class="content">
-            <h1 class="main-logo">UZI7799</h1>
+            <div class="main-logo-container">
+                <h1 class="main-logo" id="typewriter"></h1>
+            </div>
             <h3 class="sub-title">HIGHPLAYER UZI</h3>
 
             <div class="main-action">
@@ -204,11 +179,9 @@
                     <div class="member-btn">
                         <span>MEMBER</span>
                     </div>
-                    
                     <div class="partner-section">
                         <p class="partner-label">PARTNER</p>
                         <p class="partner-names">Feelliketornado × Natural × Khonlaradup × Twotwofour</p>
-                        <p class="footer-note">เหล่า PARTNER ที่น่าเกรงขาม</p>
                     </div>
                 </div>
             </div>
@@ -219,5 +192,84 @@
         </footer>
     </div>
 
+    <script>
+        /* --- Typewriter Effect (พิมพ์แล้วลบ) --- */
+        const text = "UZI7799";
+        const speed = 200; // ความเร็วการพิมพ์
+        const eraseSpeed = 100; // ความเร็วตอนลบ
+        const delayBetween = 2000; // รอตอนพิมพ์เสร็จแล้วค่อยลบ
+        
+        const typewriterElement = document.getElementById('typewriter');
+        let isDeleting = false;
+        let charIndex = 0;
+
+        function type() {
+            const currentText = isDeleting 
+                ? text.substring(0, charIndex--) 
+                : text.substring(0, charIndex++);
+
+            typewriterElement.innerHTML = currentText;
+
+            let typeSpeed = isDeleting ? eraseSpeed : speed;
+
+            if (!isDeleting && charIndex > text.length) {
+                isDeleting = true;
+                typeSpeed = delayBetween; // รอสักพักก่อนเริ่มลบ
+            } else if (isDeleting && charIndex < 0) {
+                isDeleting = false;
+                charIndex = 0;
+                typeSpeed = 500; // รอสักพักก่อนเริ่มพิมพ์ใหม่
+            }
+
+            setTimeout(type, typeSpeed);
+        }
+
+        /* --- Rain Effect (ฝนตก) --- */
+        const canvas = document.getElementById('rainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const raindrops = [];
+        for (let i = 0; i < 150; i++) {
+            raindrops.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                velocity: Math.random() * 20 + 10,
+                length: Math.random() * 20 + 10
+            });
+        }
+
+        function drawRain() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 1;
+            ctx.lineCap = 'round';
+
+            raindrops.forEach(drop => {
+                ctx.beginPath();
+                ctx.moveTo(drop.x, drop.y);
+                ctx.lineTo(drop.x, drop.y + drop.length);
+                ctx.stroke();
+
+                drop.y += drop.velocity;
+                if (drop.y > canvas.height) {
+                    drop.y = -drop.length;
+                    drop.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(drawRain);
+        }
+
+        // เริ่มทำงาน
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        type();
+        drawRain();
+    </script>
 </body>
 </html>
